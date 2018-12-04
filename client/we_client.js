@@ -1,0 +1,76 @@
+var we_client = {
+	// Attirbutes
+	endpoint : "",
+	access_token : "",
+	env_id : "",
+
+	// Methods
+
+	// Initializer
+	init : function(root) {
+		this.endpoint = root;
+		this.__get_token();
+	},
+
+	// Start Sync
+	sync : function(interval) {
+		setInterval(function(client) {
+			client.ajax("POST", "sync", logic.sync_callback);
+		}, interval, this);
+	},
+
+	__get_token: function() {
+		this.ajax("GET", "get_token", (resp) => {
+			if(resp.res) {
+				this.access_token = resp.token;
+			}
+
+			this.token_issued = true;
+		});
+	},
+
+	// Make an ajax call
+	ajax : function(method, uri, callback, args) {
+		const xhttp = new XMLHttpRequest();
+		xhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				callback(JSON.parse(this.response));
+			}
+		};
+		xhttp.open(method, this.endpoint + uri, true);
+		xhttp.setRequestHeader("Content-Type", "application/json");
+		xhttp.setRequestHeader("access-token", this.access_token);
+		xhttp.setRequestHeader("env-id", this.env_id);
+
+		if(uri == "action") {
+			const payload = {action_id:args[0], parameters:args[1]};
+			xhttp.send(JSON.stringify(payload));
+		} else {
+			xhttp.send(); 
+		}
+	},
+
+	// Start environment
+	start_env : function(callback) {
+		this.ajax("POST", "startenv", (resp) => {
+			if(resp.res) {
+				this.env_id = resp.id;
+				callback(resp.id);
+			}
+		});
+	},
+
+	// Join environment
+	join_env : function(callback) {
+		this.ajax("POST", "joinenv", (resp) => {
+			callback(resp.res);
+		});
+	},
+
+	// Send action
+	action : function(action_id, parameters, callback) {
+		this.ajax("POST", "action", (resp) => {
+			callback(resp.res);
+		}, [action_id, parameters]);
+	},
+};
