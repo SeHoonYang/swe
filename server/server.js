@@ -3,7 +3,7 @@ const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
-exports.init_server = function (secret, ep_prefix, config_path) {
+exports.init_server = function (secret, ep_prefix, config_path, timeout_check) {
 
 const logic = require(config_path + '/logic');
 
@@ -14,7 +14,7 @@ const app = express();
 function make_env(issuer) {
 	const new_env = new Object();
 	new_env.member = new Map();
-	new_env.member.set(issuer, 0);
+	new_env.member.set(issuer, {counter:0, last_time:Date.now()});
 	new_env.sync_vars = new Map();
 	new_env.server_vars = new Map();
 
@@ -27,6 +27,7 @@ function make_env(issuer) {
 	for(server_variable of settings.server_var) {
 		new_env.server_vars.set(server_variable.name, server_variable.value);
 	}
+	new_env.timeout = settings.timeout;
 
 	return new_env;
 }
@@ -46,7 +47,10 @@ function validation(req, res, callback) {
 		// pass user id to callback function
 		callback(client);
 	} catch(err) {
-		console.log(err);
+		// error named JsonWebTokenError is not a bug
+		if(err.name != "JsonWebTokenError") {
+			console.log(err);
+		}
 		res.json({"res": false});
 	}
 }
@@ -96,7 +100,7 @@ app.post(ep_prefix + "/sync", (req, res) => {
 
 	// invalid environment id
 	if (env == undefined) {
-		return res.json({});
+		return res.json({"res" : false});
 	}
 
 	// need protection for DoS like attack
@@ -105,13 +109,13 @@ app.post(ep_prefix + "/sync", (req, res) => {
 
 		// send sync variables
 		for (vars of env.sync_vars){
-			if (env.member.get(client) % vars[1].sync_rate == 0) {
+			if (env.member.get(client).counter % vars[1].sync_rate == 0) {
 				payload.push({name:vars[0], value:vars[1].value});
 			}
 		}
 
-		// increase sync counter
-		env.member.set(client, env.member.get(client) + 1);
+		// increase sync counter, update alive
+		env.member.set(client, {counter:env.member.get(client).counter + 1, last_time:Date.now()});
 
 		res.json(payload);
 	});
@@ -155,9 +159,12 @@ app.post(ep_prefix + "/startenv", (req, res) => {
  */
 app.post(ep_prefix + "/joinenv", (req, res) => {
 	const env = environments.get(req.headers['env-id']);
+	if (env == undefined) {
+		return res.json({"res" : false});
+	}
 
 	validation(req, res, (client) => {
-		env.member.set(client, 0);
+		env.member.set(client, {counter:0, last_time:Date.now()});
 
 		// run logic - member joined
 		logic.join_member(env, client);
@@ -202,6 +209,26 @@ app.post(ep_prefix + "/action", (req, res) => {
 		res.json({"res":true});
 	});
 });
+
+// start user-timeout checker
+setInterval(function(){
+	for(env of environments) {
+		for(member of env[1].member) {
+			if (member[1].last_time + env[1].timeout * 1000 < Date.now()) {
+				// call timeout logic
+				logic.timeout(env[1], member[0]);
+
+				// remove from the member list
+				env[1].member.delete(member[0]);
+			}
+		}
+
+		// delete environments if every member kicked
+		if(env[1].member.size == 0) {
+			environments.delete(env[0]);
+		}
+	}
+}, timeout_check);
 
 return app;
 };

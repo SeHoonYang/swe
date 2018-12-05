@@ -3,11 +3,12 @@ const secret = "Top Secret";
 const ep_prefix = "/we_api";
 const port = 6033;
 const config_path = __dirname + "/settings";
+const timeout_check = 5000;
 
 const fs = require('fs');
 const server = require('../../server/server');
 
-const app = server.init_server(secret, ep_prefix, config_path);
+const app = server.init_server(secret, ep_prefix, config_path, timeout_check);
 
 app.get("/", (req, res) => {
 	const index = fs.readFileSync("index.html");

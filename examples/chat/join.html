@@ -20,8 +20,6 @@
 	</div>
 	<hr class="mt-0"/>
 	<div class="container">
-		<button class="btn btn-block btn-outline-primary" onclick="joinRoom();">Join</button>
-		<br />
 		<div id="notice-field">
 		</div>
 		<table class="table">
@@ -54,13 +52,19 @@
 		we_client.env_id = params["env_id"];
 		we_client.init("we_api/");
 
-		function joinRoom() {
-			we_client.join_env((res) => {
-				if(res) {
-					$("#notice-field").append("<h6>Joined to '" + id + "'</h6>");
-				}
-			});
-			we_client.sync(300);
+		join(join_callback);
+
+		function join(callback) {
+			we_client.join_env(callback);
+		}
+
+		function join_callback(res) {
+			if(res) {
+				$("#notice-field").append("<h6>Joined to '" + we_client.env_id + "'</h6>");
+				we_client.sync(300);
+			} else {
+				setTimeout(function(){join(join_callback);}, 1000);
+			}
 		}
 
 		function sendMsg() {
