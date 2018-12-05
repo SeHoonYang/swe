@@ -15,6 +15,6 @@ var logic = {
 			}
 		}
 
-		$("#text-field").scrollTop($("#text-field").height());
+		$("#text-field").scrollTop($("#text-field")[0].scrollHeight);
 	}
 };
