@@ -24,9 +24,14 @@ app.get("/join", (req, res) => {
 });
 
 app.get("/script/:resName", (req, res) => {
-	const script = fs.readFileSync("../../client/" + req.params.resName);
 	res.writeHead(200, {'Content-Type': 'text/javascript'});
-	res.write(script);
+
+	if(req.params.resName == "we_client.js") {
+		res.write(fs.readFileSync("../../client/" + req.params.resName));
+	} else {
+		res.write(fs.readFileSync(req.params.resName));
+	}
+
 	return res.end();
 });
 

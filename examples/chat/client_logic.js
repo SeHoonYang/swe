@@ -14,5 +14,7 @@ var logic = {
 				}
 			}
 		}
+
+		$("#text-field").scrollTop($("#text-field").height());
 	}
 };
