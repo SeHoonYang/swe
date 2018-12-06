@@ -10,4 +10,4 @@ This will shows issued environment id
 Access to http://~/join?env_id=PREVIOUSLY_ISSUED_ENV_ID
 
 # Limitation
-This example retrieve entire chatting messages from the server on every sync request. So if messages are stacked, performance will drop.
+This example uses signal variable. So when a new client joined to the environment, previous messages will not be shown to the new client. However, performance problem of normal chat example is solved.
