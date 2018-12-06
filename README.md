@@ -30,6 +30,7 @@ env.json file has the following structure
 Variables that belong to sync_var will be sent to clients periodically. "name" field indicates the name of the variable. "value" field indicates initial value of the variable. "sync_rate" field indicates period for synchronization. Clients will send synchronization request to the server periodically. Each request will increase the client's internal sync-counter by 1. If sync-counter % sync_rate == 0, the server will send the variable to the client.
 
 Variables that belong to server_var will not be sent to clients. You can store variables that need to be hidden to clients.
+There is one another type of variable, "signal variable". Signal variables are sent to the each client only one time. They expired when they sent to all registered clients.
 
 timeout field indicates timeout time in seconds. If clients do not send sync request for specified time, the server regards the client as disconnected. The client will be excluded from the environment.
 ### 2. define environment logic
@@ -54,7 +55,7 @@ exports.message_arrived = function(env, client_id, action_id, arguments) {
 exports.timeout = function(env, client_id) {
 };
 ```
-You can access sync variables and server variables by env.sync_vars / env.server_vars. Note that they are Map() in javascript. So you can access your variables defined at env.json by env.sync_vars.get("sync_var1").value or env.server_vars.set("var_3") and so on. Since server variables do not have sync rate field, value of the variables is obtained by env.server_vars.get(). However, env.sync_var.get() will return an object - {value: your_desired_value, sync_rate:some_sync_rate}.
+You can access sync variables and server variables by env.sync_vars / env.server_vars. Note that they are Map() in javascript. So you can access your variables defined at env.json by env.sync_vars.get("sync_var1").value or env.server_vars.set("var_3") and so on. Since server variables do not have sync rate field, value of the variables is obtained by env.server_vars.get(). However, env.sync_var.get() will return an object - {value: your_desired_value, sync_rate:some_sync_rate}. Signal variables can be registered by env.register_sig_var(var_name, var_value). Accessing signal variable with variable name is complex. Sinal variable has a map structure with key:client-id, value:{name:name, value:value}. So, accessing signal variables directly by env.signal_vars is not recommended.
 ### 3. define app.js
 This file is your main script file for node. First, include the server.js from this library.
 ```
