@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+	<title>we lib / chatting example</title>
+	<style>
+	.chat-box {
+		height: 400px;
+		overflow-y: scroll;
+		word-break: break-all;
+	}
+	</style>
+</head>
+<body>
+	<div class="header p-3">
+		<h3>Chatting example</h3>
+	</div>
+	<hr class="mt-0"/>
+	<div class="container">
+		<button class="btn btn-block btn-outline-primary" onclick="createRoom();">Start a new room</button>
+		<br />
+		<div id="notice-field">
+		</div>
+		<table class="table">
+			<tr>
+				<td class="p-0" style="border: none;">
+					<div class="border chat-box" id="text-field">
+					</div>
+				</td>
+				<td class="w-25 p-0" style="border: none;">
+					<div class="border chat-box" id="id-field">
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="p-0">
+					<input type="text" class="w-100" style="height:25px;" id="msg-field" onkeydown="if(event.keyCode == 13){sendMsg();}"></input>
+				</td>
+				<td class="p-0" style="position:relative;">
+					<input type="button" class="btn btn-block btn-primary" style="height:25px;" onclick="sendMsg()"></input>
+					<h6 class="text-white" style="position:absolute; top: 2px; left: 40%;" onclick="sendMsg()">Send</h6>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<script src="script/client_logic.js"></script>
+	<script src="script/we_client.js"></script>
+	<script>
+		we_client.init("we_api/");
+
+		function createRoom() {
+			we_client.start_env((id) => {
+				$("#notice-field").append("<h6>New room '" + id + "' created</h6>");
+			});
+			we_client.sync(300);
+		}
+
+		function sendMsg() {
+			// note that action id must not be 0
+			we_client.action(1, [$("#msg-field").val()], () => {});
+			$("#msg-field").val("");
+		}
+	</script>
+
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+</body>
+</html>

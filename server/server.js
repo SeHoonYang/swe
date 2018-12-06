@@ -17,6 +17,17 @@ function make_env(issuer) {
 	new_env.member.set(issuer, {counter:0, last_time:Date.now()});
 	new_env.sync_vars = new Map();
 	new_env.server_vars = new Map();
+	new_env.signal_vars = new Map();
+
+	new_env.register_sig_var = function (name, value) {
+		for(member_id of this.member.keys()){
+			if (this.signal_vars.get(member_id) == undefined) {
+				this.signal_vars.set(member_id, [{name:name, value:value}]);
+			} else {
+				this.signal_vars.get(member_id).push({name:name, value:value});
+			}
+		}
+	}
 
 	// read setting file
 	const settings = JSON.parse(fs.readFileSync(config_path + "/env.json"));
@@ -113,6 +124,16 @@ app.post(ep_prefix + "/sync", (req, res) => {
 				payload.push({name:vars[0], value:vars[1].value});
 			}
 		}
+
+		// send signal variables
+		if(sig_vals = env.signal_vars.get(client)) {
+			for (vars of sig_vals){
+				payload.push(vars);
+			}
+		}
+
+		// may causes race condition
+		env.signal_vars.delete(client);
 
 		// increase sync counter, update alive
 		env.member.set(client, {counter:env.member.get(client).counter + 1, last_time:Date.now()});
@@ -220,6 +241,9 @@ setInterval(function(){
 
 				// remove from the member list
 				env[1].member.delete(member[0]);
+
+				// remove signal variables
+				env[1].signal_vals.delete(member[0]);
 			}
 		}
 
