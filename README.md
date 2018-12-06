@@ -149,7 +149,8 @@ After join_env, you need to call we_client.sync to start a synchronization loop.
 
 # Examples
 Will be updated at examples/ directory. Currently available examples:
-* chat : simple chat service.
+* chat : simple chat service using sync-variable.
+* chat_sig : simple chat service using signal-variable.
 
 # License
 Please refer to the LICENSE file.
