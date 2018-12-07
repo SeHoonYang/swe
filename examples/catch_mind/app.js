@@ -36,7 +36,7 @@ app.get("/script/:resName", (req, res) => {
 });
 
 app.get("/sprites/:resName", (req, res) => {
-	res.writeHead(200, {'Content-Type': 'text/javascript'});
+	res.writeHead(200, {'Content-Type': 'image/png'});
 
 	res.write(fs.readFileSync("sprites/" + req.params.resName));
 
