@@ -11,7 +11,7 @@
 </head>
 <body style="min-width:900px;">
 	<div class="header p-3 bg-secondary">
-		<h3 class="text-white">Catch mind example</h3>
+		<h3 class="text-white" onclick="location.href='/'">Catch mind example</h3>
 	</div>
 	<hr class="m-0"/>
 	<div class="bg-light">
@@ -19,57 +19,13 @@
 		<table class="border-left border-right bg-white">
 		<tr>
 			<td style="width:645px;vertical-align: top;border-right:1px solid #e5e5e5;">
-				<div class="p-4">
-					<div style="width:605px;">
-						<button class="btn btn-block btn-outline-secondary" onclick="createRoom();" id="start_btn">Start a new room</button>
-					</div>
-					<br />
-					<div id="notice-field">
-					</div>
-					<canvas id="canvas" width="600" height="400" style="border:2px solid; cursor: url('/sprites/pencil.png'), default;" onmousedown="mousedown(event)" onmousemove="mousemove(event)" onmouseup="paint=false" onmouseleave="paint=false"></canvas>
-				</div>
-				<hr />
-				<h6 class="pl-4">Tools</h6>
-				<hr />
-				<div class="px-4 pb-4">
-					<h6>Eraser</h6>
-					<div class="d-flex">
-						<button class="btn flex-fill mr-1 btn-outline-primary" onclick="erase();">Erase All</button>
-						<button class="btn flex-fill btn-outline-primary" onclick="changeColor('#ffffff');">Eraser</button>
-					</div>
-					<br />
-					<h6>Color</h6>
-					<div class="d-flex">
-						<button class="btn btn-outline-dark flex-fill mr-1" onclick='changeColor("#3a3b3c");'>Black</button>
-						<button class="btn btn-outline-primary flex-fill mr-1" onclick='changeColor("#007bff");'>Blue</button>
-						<button class="btn btn-outline-danger flex-fill mr-1" onclick='changeColor("#dc3545");'>red</button>
-						<button class="btn btn-outline-warning flex-fill mr-1" onclick='changeColor("#ffc107");'>yellow</button>
-						<button class="btn btn-outline-success flex-fill mr-1" onclick='changeColor("#28a745");'>green</button>
-						<button class="btn btn-outline-dark flex-fill" onclick='changeColor("#f8f9fa");'>White</button>
-					</div>
-					<br />
-					<h6>Thickness</h6>
-					<input type="range" style="width:605px !important;" class="custom-range" id="thickness" min="3" max="20" value="5"/>
+				<div id="rooms">
 				</div>
 			</td>
 			<td style="min-width:400px;vertical-align: top;">
-				<h6 class="p-2">Question</h6>
-				<hr class="mt-0"/>
-				<div align="center">
-				<h2 id="question" style="text-transform: uppercase;">**</h2>
+				<div class="p-4">
+					<button class="btn btn-block btn-outline-primary" onclick="location.href='make'">Create a new room</button>
 				</div>
-				<hr class="mb-0"/>
-				<h6 class="p-2 mt-1">Players</h6>
-				<hr class="m-0"/>
-				<div class="pl-2 pt-2" style="height:200px;overflow-y:scroll;max-width:400px;" id="user_list">
-				</div>
-				<hr class="m-0"/>
-				<h6 class="p-2 mt-1">Messages</h6>
-				<hr class="m-0"/>
-				<div class="pl-2" style="height:410px;overflow-y:scroll;max-width:400px;word-break: break-all;" id="text-field">
-				</div>
-				<hr class="m-0"/>
-				<input class="w-100 mt-1" id="msg-field" onkeydown="if(event.keyCode == 13){sendMsg();}"></input>
 			</td>
 		</tr>
 		</table>
@@ -80,115 +36,30 @@
 	</div>
 	<script src="script/client_logic.js"></script>
 	<script src="script/we_client.js"></script>
-	<script>
-		we_client.init("we_api/");
-
-		function createRoom() {
-			we_client.start_env(function (id) {
-				$("#notice-field").append("<h6>New room '" + id + "' created</h6>");
-				$("#start_btn").remove();
-				we_client.sync(300);
-			}.bind(this));
-		}
-
-		// Code from http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/
-		const context = document.getElementById('canvas').getContext("2d");
-
-		var clickX = new Array();
-		var clickY = new Array();
-		var clickDrag = new Array();
-		var clickXnet = new Array();
-		var clickYnet = new Array();
-		var clickDragnet = new Array();
-		var color="#3a3b3c";
-		var paint;
-
-		function mousedown(e) {
-			var mouseX = e.pageX - $("#canvas").offset().left;
-			var mouseY = e.pageY - $("#canvas").offset().top;
-
-			paint = true;
-			addClick(e.pageX - $("#canvas").offset().left, e.pageY - $("#canvas").offset().top);
-			redraw();
-		}
-
-		function mousemove(e) {
-			if(paint){
-				addClick(e.pageX - $("#canvas").offset().left, e.pageY - $("#canvas").offset().top, true);
-				redraw();
-			}
-		}
-
-		function addClick(x, y, dragging)
-		{
-			clickX.push(x);
-			clickY.push(y);
-			clickDrag.push(dragging);
-
-			clickXnet.push(x);
-			clickYnet.push(y);
-			clickDragnet.push(dragging);
-		}
-
-		function redraw() {
-			context.strokeStyle = color;
-			context.lineJoin = "round";
-			context.lineWidth = $("#thickness")[0].value;
-
-			for(var i=1; i < clickX.length; i++) {		
-				context.beginPath();
-				if(clickDrag[i] && i){
-					context.moveTo(clickX[i-1], clickY[i-1]);
-				}else{
-					context.moveTo(clickX[i]-1, clickY[i]);
-				}
-				context.lineTo(clickX[i], clickY[i]);
-				context.closePath();
-				context.stroke();
-			}
-			lastX = clickX[clickX.length - 1];
-			lastY = clickY[clickY.length - 1];
-			lastDrag = clickDrag[clickDrag.length - 1];
-
-			clickX = [lastX];
-			clickY = [lastY];
-			clickDrag = [false];
-		}
-
-		setInterval(function() {
-			if (clickXnet.length == 0) {
-				return;
-			}
-
-			we_client.action(1, [clickXnet, clickYnet, clickDragnet, color, $("#thickness")[0].value], function () {
-				clickXnet = [clickXnet[clickXnet.length - 1]];
-				clickYnet = [clickYnet[clickYnet.length - 1]];
-				clickDragnet = [clickDragnet[clickDragnet.length - 1]];
-			}.bind(this));
-		}, 300);
-
-		function erase() {
-			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
-			we_client.action(2, []);
-		}
-
-		function sendMsg() {
-			// note that action id must not be 0
-			we_client.action(3, [$("#msg-field").val()]);
-			$("#msg-field").val("");
-		}
-
-		function changeColor(c) {
-			if(c != "#ffffff")
-				$('#canvas').css({'cursor': 'url(/sprites/pencil.png), default'});
-			else
-				$('#canvas').css({'cursor': 'url(/sprites/eraser.png), default'});
-		
-			color =c;
-		}
-	</script>
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+	<script>
+		const room_elem = $("#rooms");
+		get_list();
+
+		// ajax call
+		setInterval(function() {
+			get_list();
+		}, 5000);
+
+		function get_list () {
+			we_client.ajax("GET", "we_api/getenvlist", function(rst){
+				room_elem.empty();
+				if(rst.length == 0) {
+					room_elem.append("<h5 class='p-4'>No rooms exist</h5>");
+				}
+
+				for (ids in rst) {
+					room_elem.append("<div class='border p-3 m-1'><h6>Room : <span class='text-info'>" + rst[ids].id + "</span></h6><h6>Current player : <span class='text-primary'>" + rst[ids].member + "</span></h6><button class='btn btn-block btn-outline-secondary' onclick='location.href=\"join?env_id=" + rst[ids].id + "\"'>Join this room</button></div>")
+				}
+			}.bind(this));
+		}
+	</script>
 </body>
 </html>

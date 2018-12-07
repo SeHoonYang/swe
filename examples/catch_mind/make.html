@@ -20,24 +20,43 @@
 		<tr>
 			<td style="width:645px;vertical-align: top;border-right:1px solid #e5e5e5;">
 				<div class="p-4">
+					<div style="width:605px;">
+						<button class="btn btn-block btn-outline-secondary" onclick="createRoom();" id="start_btn">Start a new room</button>
+					</div>
+					<br />
 					<div id="notice-field">
 					</div>
-					<canvas id="canvas" width="600" height="400" style="border:2px solid"></canvas>
+					<canvas id="canvas" width="600" height="400" style="border:2px solid; cursor: url('/sprites/pencil.png'), default;" onmousedown="mousedown(event)" onmousemove="mousemove(event)" onmouseup="paint=false" onmouseleave="paint=false"></canvas>
 				</div>
 				<hr />
-				<h6 class="pl-4">Submit Answer</h6>
+				<h6 class="pl-4">Tools</h6>
 				<hr />
-				<div class="p-4">
-					<input class="form-control" id="my-answer" onkeydown="if(event.keyCode == 13){sendAnswer();}"></input>
+				<div class="px-4 pb-4">
+					<h6>Eraser</h6>
+					<div class="d-flex">
+						<button class="btn flex-fill mr-1 btn-outline-primary" onclick="erase();">Erase All</button>
+						<button class="btn flex-fill btn-outline-primary" onclick="changeColor('#ffffff');">Eraser</button>
+					</div>
 					<br />
-					<button class="btn btn-block btn-outline-primary" onclick="sendAnswer();">Submit</button>
+					<h6>Color</h6>
+					<div class="d-flex">
+						<button class="btn btn-outline-dark flex-fill mr-1" onclick='changeColor("#3a3b3c");'>Black</button>
+						<button class="btn btn-outline-primary flex-fill mr-1" onclick='changeColor("#007bff");'>Blue</button>
+						<button class="btn btn-outline-danger flex-fill mr-1" onclick='changeColor("#dc3545");'>red</button>
+						<button class="btn btn-outline-warning flex-fill mr-1" onclick='changeColor("#ffc107");'>yellow</button>
+						<button class="btn btn-outline-success flex-fill mr-1" onclick='changeColor("#28a745");'>green</button>
+						<button class="btn btn-outline-dark flex-fill" onclick='changeColor("#f8f9fa");'>White</button>
+					</div>
+					<br />
+					<h6>Thickness</h6>
+					<input type="range" style="width:605px !important;" class="custom-range" id="thickness" min="3" max="20" value="5"/>
 				</div>
 			</td>
 			<td style="min-width:400px;vertical-align: top;">
-				<h6 class="p-2">My Score</h6>
+				<h6 class="p-2">Question</h6>
 				<hr class="mt-0"/>
 				<div align="center">
-				<h2 id="score">0</h2>
+				<h2 id="question" style="text-transform: uppercase;">**</h2>
 				</div>
 				<hr class="mb-0"/>
 				<h6 class="p-2 mt-1">Players</h6>
@@ -62,46 +81,65 @@
 	<script src="script/client_logic.js"></script>
 	<script src="script/we_client.js"></script>
 	<script>
-		params={};location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){params[k]=v});
-
-		we_client.env_id = params["env_id"];
 		we_client.init("we_api/");
 
-		join(join_callback);
-
-		function join(callback) {
-			we_client.join_env(callback);
-		}
-
-		function join_callback(res) {
-			if(res) {
-				$("#notice-field").append("<h6>Joined to '" + we_client.env_id + "'</h6>");
+		function createRoom() {
+			we_client.start_env(function (id) {
+				$("#notice-field").append("<h6>New room '" + id + "' created</h6>");
+				$("#start_btn").remove();
 				we_client.sync(300);
-			} else {
-				setTimeout(function(){join(join_callback);}, 1000);
-			}
+			}.bind(this));
 		}
 
 		// Code from http://www.williammalone.com/articles/create-html5-canvas-javascript-drawing-app/
 		const context = document.getElementById('canvas').getContext("2d");
 
-		var score = 0;
 		var clickX = new Array();
 		var clickY = new Array();
 		var clickDrag = new Array();
-		var color = "#3a3b3c";
-		var thickness = 5;
+		var clickXnet = new Array();
+		var clickYnet = new Array();
+		var clickDragnet = new Array();
+		var color="#3a3b3c";
+		var paint;
+
+		function mousedown(e) {
+			var mouseX = e.pageX - $("#canvas").offset().left;
+			var mouseY = e.pageY - $("#canvas").offset().top;
+
+			paint = true;
+			addClick(e.pageX - $("#canvas").offset().left, e.pageY - $("#canvas").offset().top);
+			redraw();
+		}
+
+		function mousemove(e) {
+			if(paint){
+				addClick(e.pageX - $("#canvas").offset().left, e.pageY - $("#canvas").offset().top, true);
+				redraw();
+			}
+		}
+
+		function addClick(x, y, dragging)
+		{
+			clickX.push(x);
+			clickY.push(y);
+			clickDrag.push(dragging);
+
+			clickXnet.push(x);
+			clickYnet.push(y);
+			clickDragnet.push(dragging);
+		}
 
 		function redraw() {
 			context.strokeStyle = color;
 			context.lineJoin = "round";
-			context.lineWidth = thickness;
+			context.lineWidth = $("#thickness")[0].value;
 
 			for(var i=1; i < clickX.length; i++) {		
 				context.beginPath();
 				if(clickDrag[i] && i){
 					context.moveTo(clickX[i-1], clickY[i-1]);
-				} else {
+				}else{
 					context.moveTo(clickX[i]-1, clickY[i]);
 				}
 				context.lineTo(clickX[i], clickY[i]);
@@ -114,7 +152,24 @@
 
 			clickX = [lastX];
 			clickY = [lastY];
-			clickDrag = [lastDrag];
+			clickDrag = [false];
+		}
+
+		setInterval(function() {
+			if (clickXnet.length == 0) {
+				return;
+			}
+
+			we_client.action(1, [clickXnet, clickYnet, clickDragnet, color, $("#thickness")[0].value], function () {
+				clickXnet = [clickXnet[clickXnet.length - 1]];
+				clickYnet = [clickYnet[clickYnet.length - 1]];
+				clickDragnet = [clickDragnet[clickDragnet.length - 1]];
+			}.bind(this));
+		}, 300);
+
+		function erase() {
+			context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+			we_client.action(2, []);
 		}
 
 		function sendMsg() {
@@ -123,10 +178,13 @@
 			$("#msg-field").val("");
 		}
 
-		function sendAnswer() {
-			// note that action id must not be 0
-			we_client.action(4, [$("#my-answer").val()]);
-			$("#my-answer").val("");
+		function changeColor(c) {
+			if(c != "#ffffff")
+				$('#canvas').css({'cursor': 'url(/sprites/pencil.png), default'});
+			else
+				$('#canvas').css({'cursor': 'url(/sprites/eraser.png), default'});
+		
+			color =c;
 		}
 	</script>
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>

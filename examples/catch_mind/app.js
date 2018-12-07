@@ -22,6 +22,12 @@ app.get("/join", (req, res) => {
 	res.write(join);
 	return res.end();
 });
+app.get("/make", (req, res) => {
+	const make = fs.readFileSync("make.html");
+	res.writeHead(200, {'Content-Type': 'text/html'});
+	res.write(make);
+	return res.end();
+});
 
 app.get("/script/:resName", (req, res) => {
 	res.writeHead(200, {'Content-Type': 'text/javascript'});

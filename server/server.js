@@ -235,6 +235,24 @@ app.post(ep_prefix + "/action", (req, res) => {
 	});
 });
 
+/*
+ **********************************
+ * Method	getenvlist
+ * Request   	GET
+ * Param	
+ * Response	environments list
+ **********************************
+ * Retreive environments
+ */
+app.get(ep_prefix + "/getenvlist", (req, res) => {
+	const lists = new Array();
+
+	for (env of environments){
+		lists.push({id: env[0], member: env[1].member.size});
+	}
+	return res.json(lists);
+});
+
 // start user-timeout checker
 setInterval(function(){
 	for(env of environments) {
