@@ -33,16 +33,19 @@
 				<hr />
 				<div class="px-4 pb-4">
 					<h6>Eraser</h6>
-					<button class="btn btn-block btn-outline-primary" onclick="erase();">Erase All</button>
+					<div class="d-flex">
+						<button class="btn flex-fill mr-1 btn-outline-primary" onclick="erase();">Erase All</button>
+						<button class="btn flex-fill btn-outline-primary" onclick="changeColor('#ffffff');">Eraser</button>
+					</div>
 					<br />
 					<h6>Color</h6>
 					<div class="d-flex">
-						<button class="btn btn-outline-dark flex-fill mr-1" onclick='color="#3a3b3c";'>Black</button>
-						<button class="btn btn-outline-primary flex-fill mr-1" onclick='color="#007bff";'>Blue</button>
-						<button class="btn btn-outline-danger flex-fill mr-1" onclick='color="#dc3545";'>red</button>
-						<button class="btn btn-outline-warning flex-fill mr-1" onclick='color="#ffc107";'>yellow</button>
-						<button class="btn btn-outline-success flex-fill mr-1" onclick='color="#28a745";'>green</button>
-						<button class="btn btn-outline-dark flex-fill" onclick='color="#f8f9fa";'>White</button>
+						<button class="btn btn-outline-dark flex-fill mr-1" onclick='changeColor("#3a3b3c");'>Black</button>
+						<button class="btn btn-outline-primary flex-fill mr-1" onclick='changeColor("#007bff");'>Blue</button>
+						<button class="btn btn-outline-danger flex-fill mr-1" onclick='changeColor("#dc3545");'>red</button>
+						<button class="btn btn-outline-warning flex-fill mr-1" onclick='changeColor("#ffc107");'>yellow</button>
+						<button class="btn btn-outline-success flex-fill mr-1" onclick='changeColor("#28a745");'>green</button>
+						<button class="btn btn-outline-dark flex-fill" onclick='changeColor("#f8f9fa");'>White</button>
 					</div>
 					<br />
 					<h6>Thickness</h6>
@@ -174,9 +177,21 @@
 			we_client.action(3, [$("#msg-field").val()]);
 			$("#msg-field").val("");
 		}
+
+		function changeColor(c) {
+			if(c != "#ffffff")
+				$('#canvas').css({'cursor': 'url(/sprites/pencil.png), default'});
+			else
+				$('#canvas').css({'cursor': 'url(/sprites/eraser.png), default'});
+		
+			color =c;
+		}
 	</script>
 	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+	<script>
+		$('#canvas').css({'cursor': 'url(/sprites/pencil.png), default'});
+	</script>
 </body>
 </html>

@@ -35,6 +35,14 @@ app.get("/script/:resName", (req, res) => {
 	return res.end();
 });
 
+app.get("/sprites/:resName", (req, res) => {
+	res.writeHead(200, {'Content-Type': 'text/javascript'});
+
+	res.write(fs.readFileSync("sprites/" + req.params.resName));
+
+	return res.end();
+});
+
 app.listen(port, () => {
     console.log("app started to listen on " + port);
 });
