@@ -7,9 +7,9 @@ var logic = {
 
 		for (vars in resp){
 			if (resp[vars].name == "draw") {
-				clickX = resp[vars].value[0];
-				clickY = resp[vars].value[1];
-				clickDrag = resp[vars].value[2];
+				clickX = [clickX[clickX.length-1]].concat(resp[vars].value[0]);
+				clickY = [clickY[clickY.length-1]].concat(resp[vars].value[1]);
+				clickDrag = [clickDrag[clickDrag.length-1]].concat(resp[vars].value[2]);
 				color = resp[vars].value[3];
 				thickness = resp[vars].value[4];
 				redraw();
