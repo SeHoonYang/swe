@@ -52,7 +52,7 @@
 		we_client.init("we_api/");
 
 		function createRoom() {
-			we_client.start_env((id) => {
+			we_client.start_env(function (id) {
 				$("#notice-field").append("<h6>New room '" + id + "' created</h6>");
 			});
 			we_client.sync(300);
@@ -60,7 +60,7 @@
 
 		function sendMsg() {
 			// note that action id must not be 0
-			we_client.action(1, [$("#msg-field").val()], () => {});
+			we_client.action(1, [$("#msg-field").val()]);
 			$("#msg-field").val("");
 		}
 	</script>

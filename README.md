@@ -5,7 +5,7 @@ synchronized web environment (javascript network library using ajax call)
 The purpose of this library is implementing simple network tool with node. With this library, you can make web based application (that requires synchronization between clients and server) easily. This library is inappropriate for business product for now since I did not consider security stuff while writing the code.
 
 # Compatibility
-This library is tested with node.js 10.9.0 but maybe you can try this with higher versions. For client side, browser needs to support XMLHttpRequest function. I found that IE does not support lambda expression. I will work on it later.
+This library is tested with node.js 10.9.0 but maybe you can try this with higher versions. For client side, browser needs to support XMLHttpRequest function. There is some performance issues when a user opens developer's tool in IE.
 
 # Manual
 ### Server side

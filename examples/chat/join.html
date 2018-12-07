@@ -69,7 +69,7 @@
 
 		function sendMsg() {
 			// note that action id must not be 0
-			we_client.action(1, [$("#msg-field").val()], () => {});
+			we_client.action(1, [$("#msg-field").val()]);
 			$("#msg-field").val("");
 		}
 	</script>
