@@ -5,14 +5,14 @@ synchronized web environment (javascript network library using ajax call)
 The purpose of this library is implementing simple network tool with node. With this library, you can make web based application (that requires synchronization between clients and server) easily. This library is inappropriate for business product for now since I did not consider security stuff while writing the code.
 
 # Compatibility
-This library is tested with node.js 10.9.0 but maybe you can try this with higher versions. For client side, browser needs to support XMLHttpRequest function.
+This library is tested with node.js 10.9.0 but maybe you can try this with higher versions. For client side, browser needs to support XMLHttpRequest function. I found that IE does not support lambda expression. I will work on it later.
 
 # Manual
 ### Server side
 For the server side, you have to write 3 files : app.js, env.json, logic.js
 * app.js is a nodejs index file. Define your routers, set constants and start the server.
 * env.json defines synchronized environment structure.
-* logic.js have to implements 4 methods.
+* logic.js has to implements 4 methods.
 ### 1. define environment
 env.json file has the following structure
 ```
@@ -151,6 +151,7 @@ After join_env, you need to call we_client.sync to start a synchronization loop.
 Will be updated at examples/ directory. Currently available examples:
 * chat : simple chat service using sync-variable.
 * chat_sig : simple chat service using signal-variable.
+* chatch_mind : Simple draw-and-guess game.
 
 # License
 Please refer to the LICENSE file.

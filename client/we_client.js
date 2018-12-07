@@ -20,13 +20,13 @@ var we_client = {
 	},
 
 	__get_token: function() {
-		this.ajax("GET", "get_token", (resp) => {
+		this.ajax("GET", "get_token", function (resp) {
 			if(resp.res) {
 				this.access_token = resp.token;
 			}
 
 			this.token_issued = true;
-		});
+		}.bind(this));
 	},
 
 	// Make an ajax call
@@ -52,25 +52,27 @@ var we_client = {
 
 	// Start environment
 	start_env : function(callback) {
-		this.ajax("POST", "startenv", (resp) => {
+		this.ajax("POST", "startenv", function (resp) {
 			if(resp.res) {
 				this.env_id = resp.id;
 				callback(resp.id);
 			}
-		});
+		}.bind(this));
 	},
 
 	// Join environment
 	join_env : function(callback) {
-		this.ajax("POST", "joinenv", (resp) => {
+		this.ajax("POST", "joinenv", function (resp) {
 			callback(resp.res);
-		});
+		}.bind(this));
 	},
 
 	// Send action
 	action : function(action_id, parameters, callback) {
-		this.ajax("POST", "action", (resp) => {
-			callback(resp.res);
-		}, [action_id, parameters]);
+		this.ajax("POST", "action", function (resp) {
+			if (callback) {
+				callback(resp.res);
+			}
+		}.bind(this), [action_id, parameters]);
 	},
 };

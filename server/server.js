@@ -13,14 +13,18 @@ const app = express();
 // create environment
 function make_env(issuer) {
 	const new_env = new Object();
+	new_env.issuer = issuer
 	new_env.member = new Map();
 	new_env.member.set(issuer, {counter:0, last_time:Date.now()});
 	new_env.sync_vars = new Map();
 	new_env.server_vars = new Map();
 	new_env.signal_vars = new Map();
 
-	new_env.register_sig_var = function (name, value) {
+	new_env.register_sig_var = function (name, value, exclude_issuer) {
 		for(member_id of this.member.keys()){
+			if (exclude_issuer && this.issuer == member_id)
+				continue;
+
 			if (this.signal_vars.get(member_id) == undefined) {
 				this.signal_vars.set(member_id, [{name:name, value:value}]);
 			} else {
@@ -126,8 +130,8 @@ app.post(ep_prefix + "/sync", (req, res) => {
 		}
 
 		// send signal variables
-		if(sig_vals = env.signal_vars.get(client)) {
-			for (vars of sig_vals){
+		if(sig_vars = env.signal_vars.get(client)) {
+			for (vars of sig_vars){
 				payload.push(vars);
 			}
 		}
@@ -243,7 +247,7 @@ setInterval(function(){
 				env[1].member.delete(member[0]);
 
 				// remove signal variables
-				env[1].signal_vals.delete(member[0]);
+				env[1].signal_vars.delete(member[0]);
 			}
 		}
 
