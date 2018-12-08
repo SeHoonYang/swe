@@ -48,7 +48,7 @@ exports.message_arrived = function(env, client_id, action_id, arguments) {
 	} else if (action_id == 4) {
 		const user_name = env.server_vars.get("user_map").get(client_id);
 		const answer = env.server_vars.get("answer")
-		const sub = arguments[0].toLowerCase();
+		const sub = arguments[0].toLowerCase().replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 		if(answer == sub) {
 			env.register_sig_var("sys_chat","<h6><span class='text-primary'>" + user_name + "</span><span> suggested </span><span class='text-info'>'" + sub + "'</span><span> as the answer.</span><span class='text-success'> Correct!</span></h6>");

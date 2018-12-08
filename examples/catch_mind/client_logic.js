@@ -21,7 +21,7 @@ var logic = {
 					$("#user_list").append("<h6>" + resp[vars].value[user_index] + "</h6>");
 				}
 			} else if (resp[vars].name == "chat") {
-				$("#text-field").append("<h6>" + resp[vars].value + "</h6>");
+				$("#text-field").append("<h6>" + resp[vars].value.replace(/</g,"&lt;").replace(/>/g,"&gt;") + "</h6>");
 				new_msg_arrived = true;
 			} else if (resp[vars].name == "sys_chat") {
 				$("#text-field").append(resp[vars].value);
