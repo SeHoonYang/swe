@@ -3,13 +3,14 @@ var we_client = {
 	endpoint : "",
 	access_token : "",
 	env_id : "",
+	token_issued : false,
 
 	// Methods
 
 	// Initializer
-	init : function(root) {
+	init : function(root, callback) {
 		this.endpoint = root;
-		this.__get_token();
+		this.__get_token(callback);
 	},
 
 	// Start Sync
@@ -19,13 +20,17 @@ var we_client = {
 		}, interval, this);
 	},
 
-	__get_token: function() {
+	__get_token: function(callback) {
 		this.ajax("GET", "get_token", function (resp) {
 			if(resp.res) {
 				this.access_token = resp.token;
 			}
 
 			this.token_issued = true;
+			
+			if (callback) {
+				callback();
+			}
 		}.bind(this));
 	},
 

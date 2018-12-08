@@ -20,13 +20,9 @@
 		<tr>
 			<td style="width:645px;vertical-align: top;border-right:1px solid #e5e5e5;">
 				<div class="p-4">
-					<div style="width:605px;">
-						<button class="btn btn-block btn-outline-secondary" onclick="createRoom();" id="start_btn">Start a new room</button>
-					</div>
 					<br />
-					<div id="notice-field">
-					</div>
 					<canvas id="canvas" width="600" height="400" style="border:2px solid; cursor: url('/sprites/pencil.png'), default;" onmousedown="mousedown(event)" onmousemove="mousemove(event)" onmouseup="paint=false" onmouseleave="paint=false"></canvas>
+					<br />
 				</div>
 				<hr />
 				<h6 class="pl-4">Tools</h6>
@@ -81,11 +77,11 @@
 	<script src="script/client_logic.js"></script>
 	<script src="script/we_client.js"></script>
 	<script>
-		we_client.init("we_api/");
+		we_client.init("we_api/", createRoom);
 
 		function createRoom() {
 			we_client.start_env(function (id) {
-				$("#notice-field").append("<h6>New room '" + id + "' created</h6>");
+				$("#text-field").append("<h6>New room <span class='text-info'>" + id + "</span> created</h6>");
 				$("#start_btn").remove();
 				we_client.sync(300);
 			}.bind(this));

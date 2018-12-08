@@ -20,8 +20,6 @@
 		<tr>
 			<td style="width:645px;vertical-align: top;border-right:1px solid #e5e5e5;">
 				<div class="p-4">
-					<div id="notice-field">
-					</div>
 					<canvas id="canvas" width="600" height="400" style="border:2px solid"></canvas>
 				</div>
 				<hr />
@@ -75,7 +73,7 @@
 
 		function join_callback(res) {
 			if(res) {
-				$("#notice-field").append("<h6>Joined to '" + we_client.env_id + "'</h6>");
+				$("#text-field").append("<h6>Joined to <span class='text-info'>" + we_client.env_id + "</span></h6>");
 				we_client.sync(300);
 			} else {
 				setTimeout(function(){join(join_callback);}, 1000);
