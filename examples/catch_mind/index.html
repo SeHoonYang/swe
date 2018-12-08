@@ -52,7 +52,7 @@
 			we_client.ajax("GET", "we_api/getenvlist", function(rst){
 				room_elem.empty();
 				if(rst.length == 0) {
-					room_elem.append("<h5 class='p-4'>No rooms exist</h5>");
+					room_elem.append("<h5 class='p-4'>No room exists</h5>");
 				}
 
 				for (ids in rst) {
