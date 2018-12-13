@@ -99,18 +99,21 @@ app.get(ep_prefix + "/get_token", (req, res) => {
 	});
 });
 
+app.use(ep_prefix + "/sync", express.json());
 /*
  **********************************
  * Method	sync
  * Request   	POST
  * Param	*ACCESS-TOKEN (jwt)
  * 		*ENV-ID (jwt)
+		client side sync vars(Map)
  * Response	All outdated variables
  **********************************
  * This function returns up-to-date
  * values
  */
 app.post(ep_prefix + "/sync", (req, res) => {
+console.log(req.body);
 	const env = environments.get(req.headers['env-id']);
 
 	// invalid environment id

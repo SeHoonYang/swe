@@ -4,6 +4,8 @@ var we_client = {
 	access_token : "",
 	env_id : "",
 	token_issued : false,
+	client_sync_vars : new Map(),
+	sync_counter : 1,
 
 	// Methods
 
@@ -50,6 +52,15 @@ var we_client = {
 		if(uri == "action") {
 			const payload = {action_id:args[0], parameters:args[1]};
 			xhttp.send(JSON.stringify(payload));
+		} else if(uri == "sync") {
+			const payload = [];
+			this.client_sync_vars.forEach(function(value,key,mapObj) {
+				if (this.sync_counter % value.sync_rate == 0) {
+					payload.push({name:key, value:value.value});
+				}
+			}.bind(this));
+			xhttp.send(JSON.stringify(payload));
+			this.sync_counter += 1;
 		} else {
 			xhttp.send(); 
 		}
@@ -80,4 +91,19 @@ var we_client = {
 			}
 		}.bind(this), [action_id, parameters]);
 	},
+
+	// Register client sync variable
+	register_syncvar : function(name, init_value, sync_rate) {
+		this.client_sync_vars.set(name, {value : init_value, sync_rate : sync_rate});
+	},
+
+	// Delete client sync variable
+	delete_syncvar : function(name) {
+		this.client_sync_vars.delete(name);
+	},
+
+	// Update client sync variable
+	update_syncvar : function(name, value) {
+		this.client_sync_vars.get(name).value = value;
+	}
 };
