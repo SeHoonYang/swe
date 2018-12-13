@@ -1,5 +1,6 @@
 var logic = {
 	sync_callback : function(resp) {
+console.log(resp);
 		if(!resp)
 			return;
 

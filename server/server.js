@@ -107,13 +107,12 @@ app.use(ep_prefix + "/sync", express.json());
  * Param	*ACCESS-TOKEN (jwt)
  * 		*ENV-ID (jwt)
 		client side sync vars(Map)
- * Response	All outdated variables
  **********************************
+ * Response	All outdated variables
  * This function returns up-to-date
  * values
  */
 app.post(ep_prefix + "/sync", (req, res) => {
-console.log(req.body);
 	const env = environments.get(req.headers['env-id']);
 
 	// invalid environment id
@@ -123,6 +122,8 @@ console.log(req.body);
 
 	// need protection for DoS like attack
 	validation(req, res, (client) => {
+		logic.sync_var_arrived(env, client, req.body);
+
 		const payload = [];
 
 		// send sync variables

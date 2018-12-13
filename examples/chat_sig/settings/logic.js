@@ -51,3 +51,7 @@ exports.timeout = function(env, client_id) {
 	// remove from server list
 	env.server_vars.get("user_map").delete(client_id);
 }
+
+exports.sync_var_arrived = function(env, client_id, request) {
+	// called when a client side sync variable arrived to the server
+}
