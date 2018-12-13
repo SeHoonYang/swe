@@ -35,11 +35,12 @@ There is one another type of variable, "signal variable". Signal variables are s
 timeout field indicates timeout time in seconds. If clients do not send sync request for specified time, the server regards the client as disconnected. The client will be excluded from the environment.
 ### 2. define environment logic
 logic.js file has to be placed in the same directory as the env.json file.
-logic.js file has to implment(and export) 4 methods.
+logic.js file has to implment(and export) 5 methods.
 a) start_env(env, client_id) : called when a new environment has established.
 b) join_member(env, client_id) : called when a new member has joined.
 c) message_arrived(env, client_id, action_id, arguments) : called when a message from the client has arrived.
 d) timeout(env, client_id) : called when timeout detection logic found a disconnected client.
+d) sync_var_arrived(env, client_id, request) : called when client side sync variable arrived.
 
 So the basic template of logic.js file is smilliar as following:
 ```
@@ -53,6 +54,9 @@ exports.message_arrived = function(env, client_id, action_id, arguments) {
 };
 
 exports.timeout = function(env, client_id) {
+};
+
+exports.sync_var_arrived = function(env, client_id, request) {
 };
 ```
 You can access sync variables and server variables by env.sync_vars / env.server_vars. Note that they are Map() in javascript. So you can access your variables defined at env.json by env.sync_vars.get("sync_var1").value or env.server_vars.set("var_3") and so on. Since server variables do not have sync rate field, value of the variables is obtained by env.server_vars.get(). However, env.sync_var.get() will return an object - {value: your_desired_value, sync_rate:some_sync_rate}. Signal variables can be registered by env.register_sig_var(var_name, var_value). Accessing signal variable with variable name is complex. Sinal variable has a map structure with key:client-id, value:{name:name, value:value}. So, accessing signal variables directly by env.signal_vars is not recommended.
@@ -135,6 +139,15 @@ You can send a message to the server by calling action method.
 we_client.action(action_id, [parameters], callback);
 ```
 action_id / parameters are delivered to message_arrived methods in logic.js
+You can send your variables to the server automatically by registering variable as a client side sync variable. Client side sync variables will be sent to the server every sync call (sent by loop inside we_client.sync()).
+```
+// register
+we_client.register_syncvar("var_1", initial_value, initial_sync_rate);
+// update
+we_client.update_syncvar("var_1", new_value);
+// unregister
+we_client.delete_syncvar("var_1");
+```
 You can join to existing environment by join_env
 ```
 we_client.join_env(callback);
