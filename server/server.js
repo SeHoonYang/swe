@@ -2,6 +2,8 @@ const express = require('express');
 const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const AsyncLock = require('async-lock');
+const lock = new AsyncLock();
 
 exports.init_server = function (secret, ep_prefix, config_path, timeout_check) {
 
@@ -126,6 +128,11 @@ app.post(ep_prefix + "/sync", (req, res) => {
 
 		const payload = [];
 
+		// client is not memeber of environment
+		if(!env.member.get(client)) {
+			return res.json({"res" : false});
+		}
+
 		// send sync variables
 		for (vars of env.sync_vars){
 			if (env.member.get(client).counter % vars[1].sync_rate == 0) {
@@ -163,15 +170,18 @@ app.post(ep_prefix + "/startenv", (req, res) => {
 	validation(req, res, (client) => {
 		const env_id = issue_id(40);
 		const env = make_env(client);
+		env.id = env_id;
 		environments.set(env_id, env);
 
 		// run logic - initialization
 		logic.start_env(env, client);
-		logic.join_member(env, client);
-
-		res.json({
-			res: true,
-			id: env_id
+		lock.acquire(env.id, function() {
+			logic.join_member(env, client);
+		}).then(() => {
+			res.json({
+				res: true,
+				id: env_id
+			});
 		});
 	});
 });
@@ -196,9 +206,11 @@ app.post(ep_prefix + "/joinenv", (req, res) => {
 		env.member.set(client, {counter:0, last_time:Date.now()});
 
 		// run logic - member joined
-		logic.join_member(env, client);
-
-		res.json({"res" : true});
+		lock.acquire(env.id, function() {
+			logic.join_member(env, client);
+		}).then(() => {
+			res.json({"res" : true});
+		});
 	});
 });
 
@@ -260,23 +272,29 @@ app.get(ep_prefix + "/getenvlist", (req, res) => {
 // start user-timeout checker
 setInterval(function(){
 	for(env of environments) {
-		for(member of env[1].member) {
-			if (member[1].last_time + env[1].timeout * 1000 < Date.now()) {
-				// call timeout logic
-				logic.timeout(env[1], member[0]);
+		// acquire lock with environment id
+		lock.acquire(env[0], function() {
+		// async work
+			for(member of env[1].member) {
+				if (member[1].last_time + env[1].timeout * 1000 < Date.now()) {
+					// call timeout logic
+					logic.timeout(env[1], member[0]);
 
-				// remove from the member list
-				env[1].member.delete(member[0]);
+					// remove from the member list
+					env[1].member.delete(member[0]);
 
-				// remove signal variables
-				env[1].signal_vars.delete(member[0]);
+					// remove signal variables
+					env[1].signal_vars.delete(member[0]);
+				}
 			}
-		}
 
-		// delete environments if every member kicked
-		if(env[1].member.size == 0) {
-			environments.delete(env[0]);
-		}
+			// delete environments if every member kicked
+			if(env[1].member.size == 0) {
+				environments.delete(env[0]);
+			}
+		}).then(()=>{
+			// Do nothing
+		});
 	}
 }, timeout_check);
 
