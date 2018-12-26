@@ -158,7 +158,7 @@ we_client.env_id = "env_id returned by start_env";
 ```
 After join_env, you need to call we_client.sync to start a synchronization loop.
 # Issues
-* Kicking out disconnected user may cause race condition. Lock will be used later.
+* Small size of timeout check could stack lock acquiring request.
 
 # Examples
 Will be updated at examples/ directory. Currently available examples:
