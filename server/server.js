@@ -255,17 +255,38 @@ app.post(ep_prefix + "/action", (req, res) => {
  **********************************
  * Method	getenvlist
  * Request   	GET
- * Param	
+ * Param	page_number ( >= 0)
+ *		page_size ( > 0)
  * Response	environments list
  **********************************
  * Retreive environments
  */
 app.get(ep_prefix + "/getenvlist", (req, res) => {
 	const lists = new Array();
-
-	for (env of environments){
-		lists.push({id: env[0], member: env[1].member.size});
+	var page_number = parseInt(req.query.page_number);
+	var page_size = parseInt(req.query.page_size);
+	if (!page_number || page_number < 0) {
+		page_number = 0;
 	}
+
+	if (!page_size || page_size <= 0 || page_size > 100) {
+		page_size = 10;
+	}
+
+	var iter = 0;
+	for (env of environments) {
+		if (iter < page_size * page_number) {
+			iter++;
+			continue;
+		}
+		if (iter == page_size * (page_number + 1)) {
+			break;
+		}
+
+		lists.push({id: env[0], member: env[1].member.size});
+		iter++;
+	}
+
 	return res.json(lists);
 });
 
@@ -274,7 +295,7 @@ setInterval(function(){
 	for(env of environments) {
 		// acquire lock with environment id
 		lock.acquire(env[0], function() {
-		// async work
+			// async work
 			for(member of env[1].member) {
 				if (member[1].last_time + env[1].timeout * 1000 < Date.now()) {
 					// call timeout logic
@@ -293,7 +314,7 @@ setInterval(function(){
 				environments.delete(env[0]);
 			}
 		}).then(()=>{
-			// Do nothing
+			// do nothing
 		});
 	}
 }, timeout_check);

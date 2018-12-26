@@ -40,6 +40,9 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 	<script>
+		params={};location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){params[k]=v});
+		const page_num = params.page;
+
 		const room_elem = $("#rooms");
 		get_list();
 
@@ -49,7 +52,7 @@
 		}, 5000);
 
 		function get_list () {
-			we_client.ajax("GET", "we_api/getenvlist", function(rst){
+			we_client.ajax("GET", "we_api/getenvlist?page_number=" + page_num + "&page_size=10", function(rst){
 				room_elem.empty();
 				if(rst.length == 0) {
 					room_elem.append("<h5 class='p-4'>No room exists</h5>");
