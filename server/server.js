@@ -108,9 +108,9 @@ app.use(ep_prefix + "/sync", express.json());
  * Request   	POST
  * Param	*ACCESS-TOKEN (jwt)
  * 		*ENV-ID (jwt)
-		client side sync vars(Map)
- **********************************
+ *		client side sync vars(Map)
  * Response	All outdated variables
+ **********************************
  * This function returns up-to-date
  * values
  */
