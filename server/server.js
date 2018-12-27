@@ -176,7 +176,8 @@ app.post(ep_prefix + "/startenv", (req, res) => {
 
 		// set environment specific variables
 		env.id = env_id;
-		env.name = req.body.env_name.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+		if(req.body.env_name)
+			env.name = req.body.env_name.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 		env.pass = req.body.env_pass;
 
 		environments.set(env_id, env);
