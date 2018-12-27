@@ -64,7 +64,7 @@ function validation(req, res, callback) {
 		// pass user id to callback function
 		callback(client);
 	} catch(err) {
-		// error named JsonWebTokenError is not a bug
+		// error named JsonWebTokenError denotes illegal jwt reception
 		if(err.name != "JsonWebTokenError") {
 			console.log(err);
 		}
@@ -157,11 +157,14 @@ app.post(ep_prefix + "/sync", (req, res) => {
 	});
 });
 
+app.use(ep_prefix + "/startenv", express.json());
 /*
  **********************************
  * Method	start
  * Request   	POST
  * Param	*ACCESS-TOKEN (jwt)
+ *		env_name (optional)
+ *		env_pass (optional)
  * Response	environment id
  **********************************
  * Start new sync environment
@@ -170,7 +173,12 @@ app.post(ep_prefix + "/startenv", (req, res) => {
 	validation(req, res, (client) => {
 		const env_id = issue_id(40);
 		const env = make_env(client);
+
+		// set environment specific variables
 		env.id = env_id;
+		env.name = req.body.env_name.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+		env.pass = req.body.env_pass;
+
 		environments.set(env_id, env);
 
 		// run logic - initialization
@@ -186,12 +194,14 @@ app.post(ep_prefix + "/startenv", (req, res) => {
 	});
 });
 
+app.use(ep_prefix + "/joinenv", express.json());
 /*
  **********************************
  * Method	joinenv
  * Request   	POST
  * Param	*ACCESS-TOKEN (jwt)
  *              *ENV-ID
+ *		pass (optional)
  * Response	initial sync variables
  **********************************
  * Start new sync environment
@@ -199,6 +209,10 @@ app.post(ep_prefix + "/startenv", (req, res) => {
 app.post(ep_prefix + "/joinenv", (req, res) => {
 	const env = environments.get(req.headers['env-id']);
 	if (env == undefined) {
+		return res.json({"res" : false});
+	}
+
+	if(env.pass && env.pass != req.body.pass) {
 		return res.json({"res" : false});
 	}
 
@@ -217,7 +231,6 @@ app.post(ep_prefix + "/joinenv", (req, res) => {
 
 // body parser, require content-type:application/json
 app.use(ep_prefix + "/action", express.json());
-
 /*
  **********************************
  * Method	action
@@ -283,7 +296,7 @@ app.get(ep_prefix + "/getenvlist", (req, res) => {
 			break;
 		}
 
-		lists.push({id: env[0], member: env[1].member.size});
+		lists.push({id: env[0], member: env[1].member.size, p: !!env[1].pass, n: env[1].name});
 		iter++;
 	}
 

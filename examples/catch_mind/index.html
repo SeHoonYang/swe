@@ -59,7 +59,11 @@
 				}
 
 				for (ids in rst) {
-					room_elem.append("<div class='border p-3 m-1'><h6>Room : <span class='text-info'>" + rst[ids].id + "</span></h6><h6>Current player : <span class='text-primary'>" + rst[ids].member + "</span></h6><button class='btn btn-block btn-outline-secondary' onclick='location.href=\"join?env_id=" + rst[ids].id + "\"'>Join this room</button></div>")
+					var room_name = rst[ids].id;
+					if(rst[ids].n) {
+						room_name = rst[ids].n;
+					}
+					room_elem.append("<div class='border p-3 m-1'><h6>Room : <span class='text-info'>" + room_name + "</span></h6><h6>Current player : <span class='text-primary'>" + rst[ids].member + "</span></h6><button class='btn btn-block btn-outline-secondary' onclick='location.href=\"join?env_id=" + rst[ids].id + "\"'>Join this room</button></div>")
 				}
 			}.bind(this));
 		}
